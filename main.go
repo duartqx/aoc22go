@@ -1,7 +1,9 @@
 package main
 
-import "aoc22go/task1"
+import (
+	"aoc22go/day1"
+)
 
 func main() {
-	task1.Task1("./task1/input")
+	day1.SecondTask("./day1/input")
 }
