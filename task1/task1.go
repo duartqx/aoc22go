@@ -19,28 +19,32 @@ func Task1(file_str string) {
 
 	scan := bufio.NewScanner(file)
 
-	var highest_calories int
-	var sum int
+	var (
+		highest_amount_of_calories   int
+		current_gnome_total_calories int
+	)
 
 	for scan.Scan() {
 		// Scans and removes all newline characters
-		line := strings.ReplaceAll(scan.Text(), "\n", "")
-		// Converts string to integer
-		line_int, err := strconv.Atoi(line)
+		var strcalory string = strings.ReplaceAll(scan.Text(), "\n", "")
+		// Converts string to integer and sets the current calory
+		var calory int
+		calory, err := strconv.Atoi(strcalory)
 		if err != nil {
-			// Reached a empty line
-			if sum >= highest_calories {
-				// Checks if sum is bigger than highest_calories
-				highest_calories = sum
+			// Atoi could not parse strcalory so -> strcalory == ""
+			if current_gnome_total_calories >= highest_amount_of_calories {
+				// Checks if current total is bigger than highest_calories
+				highest_amount_of_calories = current_gnome_total_calories
 			}
-			sum = 0
+			current_gnome_total_calories = 0
 		} else {
 			// Sums the value
-			sum += line_int
+			current_gnome_total_calories += calory
 		}
 	}
 
-	fmt.Println(highest_calories)
+	// Prints the result highest_amount_of_calories
+	fmt.Println(highest_amount_of_calories)
 
 	if err := scan.Err(); err != nil {
 		log.Fatal(err)
