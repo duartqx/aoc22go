@@ -16,39 +16,33 @@ func compareHands(gnome, mine string) int {
 	switch gnome {
 	case "A":
 		if mine == "X" {
-			return 3
+			return 1 + 3
 		} else if mine == "Y" {
-			return 6
+			return 2 + 6
 		} else {
-			return 0
+			return 3 + 0
 		}
 	case "B":
 		if mine == "X" {
-			return 0
+			return 1 + 0
 		} else if mine == "Y" {
-			return 3
+			return 2 + 3
 		} else {
-			return 6
+			return 3 + 6
 		}
 	case "C":
 		if mine == "X" {
-			return 6
+			return 1 + 6
 		} else if mine == "Y" {
-			return 0
+			return 2 + 0
 		} else {
-			return 3
+			return 3 + 3
 		}
 	}
 	return 0
 }
 
 func FirstTask(file string) {
-
-	points_per_hand := map[string]int{
-		"X": 1,
-		"Y": 2,
-		"Z": 3,
-	}
 
 	fh, err := os.Open(file)
 	if err != nil {
@@ -68,7 +62,6 @@ func FirstTask(file string) {
 				scan.Text(), "\n", "",
 			), " ",
 		)
-		my_total_score += points_per_hand[hands[1]]
 		my_total_score += compareHands(hands[0], hands[1])
 	}
 	fmt.Println(my_total_score)
