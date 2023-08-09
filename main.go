@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	// day1.FirstTask("./day1/input")
-	// day1.SecondTask("./day1/input")
-	day2.FirstTask("./day2/input")
+	// day1.FirstTask("./day1/input")  // 70509
+	// day1.SecondTask("./day1/input") // 208567
+	day2.FirstTask("./day2/input")  // 10595
+	day2.SecondTask("./day2/input") // 9541
 }
