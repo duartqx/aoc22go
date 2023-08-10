@@ -2,9 +2,9 @@ package day3
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func SecondTask(file string) {
@@ -17,55 +17,31 @@ func SecondTask(file string) {
 
 	scan := bufio.NewScanner(fh)
 
+	var all_gnomes_sacks []string
 	var priority_sum int
-	var gnome_group []string
 
 	for scan.Scan() {
-		t := scan.Text()
+		all_gnomes_sacks = append(all_gnomes_sacks, scan.Text())
+	}
 
-		if len(gnome_group) != 3 {
-			gnome_group = append(gnome_group, t)
-			fmt.Println(gnome_group)
-		} else {
+	containsOne := func(g string, c rune) bool {
+		return strings.Contains(g, string(c))
+	}
 
-			uniq_1 := map[rune]string{}
-			uniq_2 := map[rune]string{}
-			uniq_3 := map[rune]string{}
-
-			for _, c := range gnome_group[0] {
-				uniq_1[c] = string(c)
-			}
-			for _, c := range gnome_group[1] {
-				uniq_2[c] = string(c)
-			}
-			for _, c := range gnome_group[2] {
-				uniq_3[c] = string(c)
-			}
-
-			fmt.Println(uniq_1)
-			fmt.Println(uniq_2)
-			fmt.Println(uniq_3)
-
-			for key := range uniq_1 {
-				v2, uniq_2_has_key := uniq_2[key]
-				v3, uniq_3_has_key := uniq_3[key]
-
-				fmt.Println(uniq_2_has_key, uniq_3_has_key)
-
-				if uniq_2_has_key && uniq_3_has_key {
-					fmt.Println(uniq_1[key], v2, v3)
-					i := int(key)
-					if i > 96 {
-						priority_sum += (int(key) - 96)
-					} else {
-						priority_sum += (int(key) - 38)
-					}
+	for i := 0; i <= len(all_gnomes_sacks)-3; i = i + 3 {
+		g1, g2, g3 := all_gnomes_sacks[i], all_gnomes_sacks[i+1], all_gnomes_sacks[i+2]
+		for _, c := range g1 {
+			if containsOne(g1, c) && containsOne(g2, c) && containsOne(g3, c) {
+				irune := int(c)
+				if irune > 96 {
+					priority_sum += irune - 96
+				} else {
+					priority_sum += irune - 38
 				}
+				break
 			}
-			fmt.Println()
-
-			gnome_group = []string{}
 		}
 	}
-	fmt.Println(priority_sum)
+
+	log.Println(priority_sum)
 }
