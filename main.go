@@ -10,5 +10,6 @@ func main() {
 	// day1.SecondTask("./day1/input") // 208567
 	// day2.FirstTask("./day2/input")  // 10595
 	// day2.SecondTask("./day2/input") // 9541
-	day3.FirstTask("./day3/input")
+	// day3.FirstTask("./day3/input")
+	day3.SecondTask("./day3/input")
 }
