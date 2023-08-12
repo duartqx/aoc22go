@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 func FirstTask(file string) {

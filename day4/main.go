@@ -4,10 +4,9 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 func getInputData(filename string) (data *[]string, err error) {
