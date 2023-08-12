@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+type Result struct {
+	s1  *[]int
+	s2  *[]int
+	err error
+}
+
 func getInputData(filename string) (data *[]string, err error) {
 
 	data = &[]string{}
@@ -40,64 +46,67 @@ func getStartEnd(t [2]string) (start, end int, err error) {
 	return start, end, err
 }
 
-func buildSlice(start, end int) (t *[]int) {
-	t = &[]int{}
+func buildSlice(start, end int) (t []int) {
+	t = []int{}
 	for i := start; i <= end; i++ {
-		*t = append(*t, i)
+		t = append(t, i)
 	}
 	return t
 }
 
-func task(input string, first_task string) int {
+func task(input string) <-chan Result {
+
+	c := make(chan Result)
 
 	gnome_section_data, err := getInputData(input)
+
 	if err != nil {
-		log.Fatal(err)
+		c <- Result{s1: nil, s2: nil, err: err}
+		return c
 	}
 
-	var first_section, second_section *[]int
+	go func() {
 
-	var how_many_overlap int
+		defer close(c)
 
-	for _, pair := range *gnome_section_data {
+		for _, pair := range *gnome_section_data {
 
-		// Resets the sections
-		first_section, second_section = &[]int{}, &[]int{}
+			// Resets the sections
+			first_section, second_section := []int{}, []int{}
 
-		ts := strings.Split(pair, ",")
+			ts := strings.Split(pair, ",")
 
-		first_range := strings.Split(ts[0], "-")
-		second_range := strings.Split(ts[1], "-")
+			first_range := strings.Split(ts[0], "-")
+			second_range := strings.Split(ts[1], "-")
 
-		// Converts and gets the start and end for the first gnome
-		first_gnome_start, first_gnome_end, err := getStartEnd(
-			[2]string{first_range[0], first_range[1]},
-		)
-		if err != nil {
-			log.Fatal(err)
+			// Converts and gets the start and end for the first gnome
+			first_gnome_start, first_gnome_end, err := getStartEnd(
+				[2]string{first_range[0], first_range[1]},
+			)
+			if err != nil {
+				c <- Result{s1: nil, s2: nil, err: err}
+			}
+
+			// Converts and gets the start and end for the second gnome
+			second_gnome_start, second_gnome_end, err := getStartEnd(
+				[2]string{second_range[0], second_range[1]},
+			)
+			if err != nil {
+				c <- Result{s1: nil, s2: nil, err: err}
+			}
+
+			first_section = buildSlice(first_gnome_start, first_gnome_end)
+			second_section = buildSlice(second_gnome_start, second_gnome_end)
+
+			c <- Result{s1: &first_section, s2: &second_section, err: nil}
 		}
-
-		// Converts and gets the start and end for the second gnome
-		second_gnome_start, second_gnome_end, err := getStartEnd(
-			[2]string{second_range[0], second_range[1]},
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		first_section = buildSlice(first_gnome_start, first_gnome_end)
-		second_section = buildSlice(second_gnome_start, second_gnome_end)
-
-		if first_task == "first_task" {
-			how_many_overlap += firstTask(first_section, second_section)
-		} else {
-			how_many_overlap += secondTask(first_section, second_section)
-		}
-	}
-	return how_many_overlap
+	}()
+	return c
 }
 
-func firstTask(s1, s2 *[]int) int {
+func firstTask(input string) (int, error) {
+
+	var how_many_overlap int
 
 	iterAndSum := func(iter, check_contains *[]int) int {
 		var overlap int
@@ -109,13 +118,24 @@ func firstTask(s1, s2 *[]int) int {
 		}
 		return overlap
 	}
-	if iterAndSum(s1, s2) == len(*s1) || iterAndSum(s2, s1) == len(*s2) {
-		return 1
+
+	for res := range task(input) {
+		if res.err != nil {
+			return 0, res.err
+		}
+
+		if iterAndSum(res.s1, res.s2) == len(*res.s1) ||
+			iterAndSum(res.s2, res.s1) == len(*res.s2) {
+			how_many_overlap++
+		}
 	}
-	return 0
+	return how_many_overlap, nil
 }
 
-func secondTask(s1, s2 *[]int) int {
+func secondTask(input string) (int, error) {
+
+	var how_many_overlap int
+
 	iterAndSum := func(iter, check_contains *[]int) bool {
 		for _, s := range *iter {
 			if slices.Contains(*check_contains, s) {
@@ -124,13 +144,33 @@ func secondTask(s1, s2 *[]int) int {
 		}
 		return false
 	}
-	if iterAndSum(s1, s2) || iterAndSum(s2, s1) {
-		return 1
+
+	for res := range task(input) {
+		if res.err != nil {
+			return 0, res.err
+		}
+
+		if iterAndSum(res.s1, res.s2) || iterAndSum(res.s2, res.s1) {
+			how_many_overlap++
+		}
 	}
-	return 0
+	return how_many_overlap, nil
 }
 
 func main() {
-	log.Println(task("./input", "first_task"))  // 657
-	log.Println(task("./input", "second_task")) // 938
+
+	input := "./input"
+
+	ft, err := firstTask(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	st, err := secondTask(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(ft) // 657
+	log.Println(st) // 938
 }
