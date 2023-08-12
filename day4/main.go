@@ -48,7 +48,7 @@ func buildSlice(start, end int) (t *[]int) {
 	return t
 }
 
-func task(input string, first_task string) {
+func task(input string, first_task string) int {
 
 	gnome_section_data, err := getInputData(input)
 	if err != nil {
@@ -94,46 +94,43 @@ func task(input string, first_task string) {
 			how_many_overlap += secondTask(first_section, second_section)
 		}
 	}
-	log.Println(how_many_overlap)
+	return how_many_overlap
 }
 
-func firstTask(first_section, second_section *[]int) int {
-	var first_overlap, second_overlap int
+func firstTask(s1, s2 *[]int) int {
 
-	for _, s := range *first_section {
-		if slices.Contains(*second_section, s) {
-			first_overlap++
+	iterAndSum := func(iter, check_contains *[]int) int {
+		var overlap int
+
+		for _, s := range *iter {
+			if slices.Contains(*check_contains, s) {
+				overlap++
+			}
 		}
+		return overlap
 	}
-
-	for _, s := range *second_section {
-		if slices.Contains(*first_section, s) {
-			second_overlap++
-		}
-	}
-
-	if first_overlap == len(*first_section) || second_overlap == len(*second_section) {
+	if iterAndSum(s1, s2) == len(*s1) || iterAndSum(s2, s1) == len(*s2) {
 		return 1
 	}
 	return 0
 }
 
-func secondTask(first_section, second_section *[]int) int {
-	for _, s := range *first_section {
-		if slices.Contains(*second_section, s) {
-			return 1
+func secondTask(s1, s2 *[]int) int {
+	iterAndSum := func(iter, check_contains *[]int) bool {
+		for _, s := range *iter {
+			if slices.Contains(*check_contains, s) {
+				return true
+			}
 		}
+		return false
 	}
-
-	for _, s := range *second_section {
-		if slices.Contains(*first_section, s) {
-			return 1
-		}
+	if iterAndSum(s1, s2) || iterAndSum(s2, s1) {
+		return 1
 	}
 	return 0
 }
 
 func main() {
-	task("./input", "first_task")  // 657
-	task("./input", "second_task") // 938
+	log.Println(task("./input", "first_task"))  // 657
+	log.Println(task("./input", "second_task")) // 938
 }
