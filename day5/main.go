@@ -1,11 +1,32 @@
 package main
 
 import (
+	"bufio"
 	"log"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
 )
+
+func getInputData(filename string) (data *[]string, err error) {
+
+	data = &[]string{}
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return data, err
+	}
+	defer file.Close()
+
+	scan := bufio.NewScanner(file)
+
+	for scan.Scan() {
+		*data = append(*data, scan.Text())
+	}
+
+	return data, nil
+}
 
 func getInstunctions(row string, instrunctions *[][]int) error {
 
@@ -34,44 +55,32 @@ func getInstunctions(row string, instrunctions *[][]int) error {
 }
 
 func main() {
-	p := `    [D]    
-[N] [C]    
-[Z] [M] [P]
- 1   2   3 
 
-move 1 from 2 to 1
-move 3 from 1 to 3
-move 2 from 2 to 1
-move 1 from 1 to 2`
+	data, err := getInputData("./input")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	crates_stacks := make(map[int][]string)
+	crates_stacks := make(map[int][]byte)
 
 	instrunctions := [][]int{}
 
-	// del := func(i string) bool {
-	// 	return i == ""
-	// }
-
-	skip := []string{"", " "}
-
-	for _, row := range strings.Split(p, "\n") {
+	for _, row := range *data {
 		if strings.Contains(row, "1") {
 			break
 		} else {
 			for i, j := 1, 1; j <= (len(row) - 1); j, i = j+4, i+1 {
 				if crates_stacks[i] == nil {
-					crates_stacks[i] = []string{}
+					crates_stacks[i] = []byte{}
 				}
-				if !slices.Contains(skip, string(row[j])) ||
-					!slices.Contains(skip, string(row[j])) {
-					crates_stacks[i] = append(crates_stacks[i], string(row[j]))
+				if strings.Trim(string(row[j]), " ") != "" {
+					crates_stacks[i] = append(crates_stacks[i], row[j])
 				}
 			}
 		}
 	}
 
-	for _, row := range strings.Split(p, "\n") {
-
+	for _, row := range *data {
 		if strings.Contains(row, "move") {
 			if err := getInstunctions(row, &instrunctions); err != nil {
 				log.Fatal(err)
@@ -82,7 +91,6 @@ move 1 from 1 to 2`
 	for _, inst := range instrunctions {
 		move, from, to := inst[0], inst[1], inst[2]
 		for i := 0; i < move; i++ {
-
 			// Gets the first element in the stack
 			crate := crates_stacks[from][0]
 
@@ -91,15 +99,16 @@ move 1 from 1 to 2`
 
 			// Inserts the crate to the start of the stack
 			crates_stacks[to] = slices.Insert(crates_stacks[to], 0, crate)
-
 		}
 	}
 
 	var answer string
 
 	for i := 1; i <= len(crates_stacks); i++ {
-		answer += crates_stacks[i][0]
+		answer += string(crates_stacks[i][0])
 	}
 
 	log.Println(answer)
 }
+
+// Task 1 -> TBVFVDZPN
