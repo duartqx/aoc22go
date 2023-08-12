@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+type tsk func(input string) (int, error)
+
 type Result struct {
 	s1  *[]int
 	s2  *[]int
@@ -161,16 +163,16 @@ func main() {
 
 	input := "./input"
 
-	ft, err := firstTask(input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fs := [2]tsk{firstTask, secondTask}
 
-	st, err := secondTask(input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	for i := 0; i <= 1; i++ {
 
-	log.Println(ft) // 657
-	log.Println(st) // 938
+		res, err := fs[i](input)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(res) // 657 938
+	}
 }
