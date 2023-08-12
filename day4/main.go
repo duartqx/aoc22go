@@ -1,12 +1,33 @@
 package main
 
 import (
+	"bufio"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
 	"golang.org/x/exp/slices"
 )
+
+func getInputData(filename string) (data *[]string, err error) {
+
+	data = &[]string{}
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return data, err
+	}
+	defer file.Close()
+
+	scan := bufio.NewScanner(file)
+
+	for scan.Scan() {
+		*data = append(*data, scan.Text())
+	}
+
+	return data, nil
+}
 
 func getStartEnd(t [2]string) (start, end int, err error) {
 	start, err = strconv.Atoi(t[0])
@@ -20,8 +41,8 @@ func getStartEnd(t [2]string) (start, end int, err error) {
 	return start, end, err
 }
 
-func buildSlice(start, end int) *[]int {
-	t := &[]int{}
+func buildSlice(start, end int) (t *[]int) {
+	t = &[]int{}
 	for i := start; i <= end; i++ {
 		*t = append(*t, i)
 	}
@@ -29,20 +50,17 @@ func buildSlice(start, end int) *[]int {
 }
 
 func main() {
-	test := []string{
-		"2-4,6-8",
-		"2-3,4-5",
-		"5-7,7-9",
-		"2-8,3-7",
-		"6-6,4-6",
-		"2-6,4-8",
+
+	gnome_section_data, err := getInputData("./input")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var first_section, second_section *[]int
 
 	var how_many_overlap int
 
-	for _, pair := range test {
+	for _, pair := range *gnome_section_data {
 
 		// Resets the sections
 		first_section, second_section = &[]int{}, &[]int{}
