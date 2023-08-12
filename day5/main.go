@@ -66,8 +66,12 @@ func main() {
 	instrunctions := [][]int{}
 
 	for _, row := range *data {
-		if strings.Contains(row, "1") {
-			break
+		if strings.Trim(row, " ") == "" || string(row[1]) == "1" {
+			continue
+		} else if strings.Contains(row, "move") {
+			if err := getInstunctions(row, &instrunctions); err != nil {
+				log.Fatal(err)
+			}
 		} else {
 			for i, j := 1, 1; j <= (len(row) - 1); j, i = j+4, i+1 {
 				if crates_stacks[i] == nil {
@@ -76,14 +80,6 @@ func main() {
 				if strings.Trim(string(row[j]), " ") != "" {
 					crates_stacks[i] = append(crates_stacks[i], row[j])
 				}
-			}
-		}
-	}
-
-	for _, row := range *data {
-		if strings.Contains(row, "move") {
-			if err := getInstunctions(row, &instrunctions); err != nil {
-				log.Fatal(err)
 			}
 		}
 	}
