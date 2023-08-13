@@ -54,18 +54,66 @@ func getInstunctions(row string, instrunctions *[][]int) error {
 	return nil
 }
 
-func main() {
+func crateMover9000(instrunctions [][]int, crates_stacks *map[int][]byte) {
 
-	data, err := getInputData("./input")
-	if err != nil {
-		log.Fatal(err)
+	for _, inst := range instrunctions {
+		move, from, to := inst[0], inst[1], inst[2]
+		for i := 0; i < move; i++ {
+			// Gets the first element in the stack
+			crate := (*crates_stacks)[from][0]
+
+			// Removes the first element from the stack
+			(*crates_stacks)[from] = (*crates_stacks)[from][1:]
+
+			// Inserts the crate to the start of the stack
+			(*crates_stacks)[to] = slices.Insert((*crates_stacks)[to], 0, crate)
+		}
 	}
+}
+
+func crateMover9001(instrunctions [][]int, crates_stacks *map[int][]byte) {
+
+	for _, inst := range instrunctions {
+		move, from, to := inst[0], inst[1], inst[2]
+		// Gets the first element in the stack
+		crates := (*crates_stacks)[from][:move]
+		slices.Reverse(crates)
+
+		// Removes the first element from the stack
+		(*crates_stacks)[from] = (*crates_stacks)[from][move:]
+
+		// Inserts the crate to the start of the stack
+		for _, c := range crates {
+			(*crates_stacks)[to] = slices.Insert((*crates_stacks)[to], 0, c)
+		}
+	}
+}
+
+func task(crate_type string) {
+
+	// data, err := getInputData("./input")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	t := `    [D]    
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3 
+
+move 1 from 2 to 1
+move 3 from 1 to 3
+move 2 from 2 to 1
+move 1 from 1 to 2`
+
+	var data []string
+
+	data = strings.Split(t, "\n")
 
 	crates_stacks := make(map[int][]byte)
 
 	instrunctions := [][]int{}
 
-	for _, row := range *data {
+	for _, row := range data {
 		if strings.Trim(row, " ") == "" || string(row[1]) == "1" {
 			continue
 		} else if strings.Contains(row, "move") {
@@ -84,18 +132,10 @@ func main() {
 		}
 	}
 
-	for _, inst := range instrunctions {
-		move, from, to := inst[0], inst[1], inst[2]
-		for i := 0; i < move; i++ {
-			// Gets the first element in the stack
-			crate := crates_stacks[from][0]
-
-			// Removes the first element from the stack
-			crates_stacks[from] = crates_stacks[from][1:]
-
-			// Inserts the crate to the start of the stack
-			crates_stacks[to] = slices.Insert(crates_stacks[to], 0, crate)
-		}
+	if crate_type == "CrateMover 9000" {
+		crateMover9000(instrunctions, &crates_stacks)
+	} else {
+		crateMover9001(instrunctions, &crates_stacks)
 	}
 
 	var answer string
@@ -105,6 +145,11 @@ func main() {
 	}
 
 	log.Println(answer)
+}
+
+func main() {
+	task("CrateMover 9000")
+	task("CrateMover 9001")
 }
 
 // Task 1 -> TBVFVDZPN
