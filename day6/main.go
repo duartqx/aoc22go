@@ -2,11 +2,17 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"log"
 	"os"
-	// "slices"
+
 	"strings"
 )
+
+type result struct {
+	val int
+	err error
+}
 
 func getInputData(filename string) (data *[]string, err error) {
 
@@ -27,6 +33,24 @@ func getInputData(filename string) (data *[]string, err error) {
 	return data, nil
 }
 
+func processSignal(signal *string, length int) (int, error) {
+	for start := 0; start <= (len(*signal) - length); start++ {
+
+		end := (start + length)
+
+		stream := make(map[string]bool)
+
+		for _, c := range strings.Split((*signal)[start:end], "") {
+			stream[c] = true
+		}
+
+		if len(stream) == length {
+			return end, nil
+		}
+	}
+	return -1, errors.New("Stream not found!")
+}
+
 func main() {
 
 	data, err := getInputData("./day6/input")
@@ -36,33 +60,37 @@ func main() {
 
 	signal := (*data)[0]
 
-	var characters_processed_until_packet_marker int // 1578
+	c := make(chan result)
 
-	for start := 0; start <= (len(signal) - 4); start++ {
-		compact_stream := make(map[string]bool)
-		for _, c := range strings.Split(signal[start:start+4], "") {
-			compact_stream[c] = true
+	go func() {
+
+		defer close(c)
+
+		for _, l := range []int{4, 14} {
+			m, err := processSignal(&signal, l)
+			if err != nil {
+				c <- result{val: -1, err: err}
+			}
+			c <- result{val: m, err: err}
 		}
-		if len(compact_stream) == 4 {
-			characters_processed_until_packet_marker = start + 4
-			break
+	}()
+
+	for res := range c {
+		if res.err != nil {
+			log.Fatal(res.err)
 		}
+		log.Println(res.val)
 	}
 
-	log.Println(characters_processed_until_packet_marker)
+	// signal_marker, err := processSignal(&signal, 4) // 1578
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// signal_message, err := processSignal(&signal, 14) // 2178
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	var characters_processed_until_message int // 2178
-
-	for start := 0; start <= (len(signal) - 14); start++ {
-		possible_message := make(map[string]bool)
-		for _, c := range strings.Split(signal[start:start+14], "") {
-			possible_message[c] = true
-		}
-		if len(possible_message) == 14 {
-			characters_processed_until_message = start + 14
-			break
-		}
-	}
-
-	log.Println(characters_processed_until_message)
+	// log.Println(signal_marker, signal_message)
 }
