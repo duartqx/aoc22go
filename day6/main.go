@@ -34,20 +34,35 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// var start_of_packet int
+	signal := (*data)[0]
 
-	for _, d := range *data {
-		for i := 0; i <= (len(d) - 4); i++ {
-			compact_stream := make(map[string]bool)
-			for _, c := range strings.Split(d[i:i+4], "") {
-				compact_stream[c] = true
-			}
-			if len(compact_stream) == 4 {
-				log.Println(i+4, ":", compact_stream)
-				break
-			}
+	var characters_processed_until_packet_marker int // 1578
+
+	for start := 0; start <= (len(signal) - 4); start++ {
+		compact_stream := make(map[string]bool)
+		for _, c := range strings.Split(signal[start:start+4], "") {
+			compact_stream[c] = true
+		}
+		if len(compact_stream) == 4 {
+			characters_processed_until_packet_marker = start + 4
+			break
 		}
 	}
-}
 
-// 1578
+	log.Println(characters_processed_until_packet_marker)
+
+	var characters_processed_until_message int // 2178
+
+	for start := 0; start <= (len(signal) - 14); start++ {
+		possible_message := make(map[string]bool)
+		for _, c := range strings.Split(signal[start:start+14], "") {
+			possible_message[c] = true
+		}
+		if len(possible_message) == 14 {
+			characters_processed_until_message = start + 14
+			break
+		}
+	}
+
+	log.Println(characters_processed_until_message)
+}
