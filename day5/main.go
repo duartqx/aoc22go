@@ -46,17 +46,14 @@ func getInstunctions(row string, instrunctions *[][]int) error {
 		inst_ints = append(inst_ints, int_inst)
 	}
 
-	*instrunctions = append(
-		*instrunctions,
-		inst_ints,
-	)
+	*instrunctions = append(*instrunctions, inst_ints)
 
 	return nil
 }
 
-func crateMover9000(instrunctions [][]int, crates_stacks *map[int][]byte) {
+func crateMover9000(instrunctions *[][]int, crates_stacks *map[int][]byte) {
 
-	for _, inst := range instrunctions {
+	for _, inst := range *instrunctions {
 		move, from, to := inst[0], inst[1], inst[2]
 		for i := 0; i < move; i++ {
 			// Gets the first element in the stack
@@ -71,9 +68,9 @@ func crateMover9000(instrunctions [][]int, crates_stacks *map[int][]byte) {
 	}
 }
 
-func crateMover9001(instrunctions [][]int, crates_stacks *map[int][]byte) {
+func crateMover9001(instrunctions *[][]int, crates_stacks *map[int][]byte) {
 
-	for _, inst := range instrunctions {
+	for _, inst := range *instrunctions {
 		move, from, to := inst[0], inst[1], inst[2]
 		// Gets the first element in the stack
 		crates := (*crates_stacks)[from][:move]
@@ -119,9 +116,9 @@ func task(input string, crate_type string) {
 	}
 
 	if crate_type == "CrateMover 9000" {
-		crateMover9000(instrunctions, &crates_stacks)
+		crateMover9000(&instrunctions, &crates_stacks)
 	} else {
-		crateMover9001(instrunctions, &crates_stacks)
+		crateMover9001(&instrunctions, &crates_stacks)
 	}
 
 	var answer string
