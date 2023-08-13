@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-type result struct {
-	val int
-	err error
-}
-
 func getInputData(filename string) (data *[]string, err error) {
 
 	data = &[]string{}
@@ -60,37 +55,15 @@ func main() {
 
 	signal := (*data)[0]
 
-	c := make(chan result)
-
-	go func() {
-
-		defer close(c)
-
-		for _, l := range []int{4, 14} {
-			m, err := processSignal(&signal, l)
-			if err != nil {
-				c <- result{val: -1, err: err}
-			}
-			c <- result{val: m, err: err}
-		}
-	}()
-
-	for res := range c {
-		if res.err != nil {
-			log.Fatal(res.err)
-		}
-		log.Println(res.val)
+	signal_marker, err := processSignal(&signal, 4) // 1578
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// signal_marker, err := processSignal(&signal, 4) // 1578
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// signal_message, err := processSignal(&signal, 14) // 2178
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	signal_message, err := processSignal(&signal, 14) // 2178
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// log.Println(signal_marker, signal_message)
+	log.Println(signal_marker, signal_message)
 }
