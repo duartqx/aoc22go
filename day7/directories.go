@@ -1,4 +1,4 @@
-package main
+package day7
 
 import (
 	"slices"
@@ -49,13 +49,14 @@ func (d *Directory) getOrCreateFile(file_size int, file_name string) (File, bool
 	return f, false
 }
 
-func (d *Directory) getOrCreateDir(dir_name string) (Directory, bool) {
-
-	dir, err := d.filesystem.makeDirectory(dir_name, d)
-	if err != nil {
-		return *dir, false
+func (d *Directory) getOrCreateDir(dir_name string) (dir *Directory, created bool) {
+	dir, exists := d.children[dir_name]
+	if !exists {
+		dir, _ = d.filesystem.makeDirectory(dir_name, d)
+		d.children[dir.name] = dir
+		return dir, true
 	}
-	return *dir, true
+	return dir, false
 }
 
 func (d *Directory) getTotalSize() (total_size int) {

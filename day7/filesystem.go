@@ -1,4 +1,4 @@
-package main
+package day7
 
 import (
 	"errors"
@@ -102,10 +102,7 @@ func createFileSystem(data *[]string) (*FileSystem, error) {
 
 		case c == "d":
 			dir_data := strings.Split(line, " ")
-			dir, created := pwd.getOrCreateDir(dir_data[1])
-			if created {
-				pwd.children[dir.name] = &dir
-			}
+			pwd.getOrCreateDir(dir_data[1])
 		}
 	}
 	return &fs, err

@@ -1,4 +1,4 @@
-package main
+package day7
 
 import (
 	"log"
@@ -38,7 +38,7 @@ func getResults(root_size int, directories map[string]Directory) (int, int) {
 	return sum_size_smaller_than_1kk, to_delete_size
 }
 
-func main() {
+func Resolve() {
 
 	data, err := getdata.GetInputData("./day7/input")
 	if err != nil {

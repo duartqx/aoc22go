@@ -1,6 +1,9 @@
 package main
 
-import "aoc22go/day3"
+import (
+	// "aoc22go/day3"
+	"aoc22go/day7"
+)
 
 // "aoc22go/day1"
 // "aoc22go/day2"
@@ -11,5 +14,6 @@ func main() {
 	// day2.FirstTask("./day2/input")  // 10595
 	// day2.SecondTask("./day2/input") // 9541
 	// day3.FirstTask("./day3/input") // 7850
-	day3.SecondTask("./day3/input") // 2581
+	// day3.SecondTask("./day3/input") // 2581
+	day7.Resolve()
 }
