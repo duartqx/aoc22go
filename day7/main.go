@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	// "strings"
 )
 
 func getData() string {
@@ -57,8 +56,8 @@ func (d *Directory) getFullPath() (full_name string) {
 
 	full_name_slice := []string{}
 
-	for d_parent := d.parent; d_parent != nil; d_parent = d_parent.parent {
-		if d_parent != nil && d_parent.name != "" {
+	for d_parent := d; d_parent != nil; d_parent = d_parent.parent {
+		if d_parent.name != "" {
 			full_name_slice = slices.Insert(full_name_slice, 0, d_parent.name)
 		}
 	}
@@ -68,7 +67,7 @@ func (d *Directory) getFullPath() (full_name string) {
 		"//", "/", 1,
 	)
 
-	return d.name
+	return full_name
 }
 
 func (d *Directory) getOrCreateFile(file_size int, file_name string) (File, bool) {
@@ -91,6 +90,16 @@ func (d *Directory) getOrCreateDir(dir_name string) (Directory, bool) {
 		return *dir, false
 	}
 	return *dir, true
+}
+
+func (d *Directory) getTotalSize() (total_size int) {
+	for fkey := range d.files {
+		total_size += d.files[fkey].size
+	}
+	for dkey := range d.children {
+		total_size += d.children[dkey].getTotalSize()
+	}
+	return total_size
 }
 
 func (f *FileSystem) makeDirectory(dir_name string, parent *Directory) (d *Directory, err error) {
@@ -183,5 +192,24 @@ func main() {
 			}
 		}
 	}
-	log.Println(pwd)
+
+	sizes := []int{}
+
+	for dkey := range fs.directories {
+		dir, exists := fs.directories[dkey]
+		if !exists {
+			log.Fatal(dir, "Does exists")
+		}
+		d_size := dir.getTotalSize()
+		if d_size <= 100000 {
+			sizes = append(sizes, d_size)
+		}
+	}
+
+	var total int
+	for _, s := range sizes {
+		total += s
+	}
+
+	log.Println(sizes, total)
 }
