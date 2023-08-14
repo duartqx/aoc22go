@@ -1,32 +1,12 @@
 package main
 
 import (
-	"bufio"
+	getdata "aoc22go/get_data"
 	"log"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 )
-
-func getInputData(filename string) (data *[]string, err error) {
-
-	data = &[]string{}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return data, err
-	}
-	defer file.Close()
-
-	scan := bufio.NewScanner(file)
-
-	for scan.Scan() {
-		*data = append(*data, scan.Text())
-	}
-
-	return data, nil
-}
 
 func getInstunctions(row string, instrunctions *[][]int) error {
 
@@ -87,7 +67,7 @@ func crateMover9001(instrunctions *[][]int, crates_stacks *map[int][]byte) {
 
 func task(input string, crate_type string) {
 
-	data, err := getInputData(input)
+	data, err := getdata.GetInputData(input)
 	if err != nil {
 		log.Fatal(err)
 	}

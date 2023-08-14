@@ -7,33 +7,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-)
 
-func getData() string {
-	return `$ cd /
-$ ls
-dir a
-14848514 b.txt
-8504156 c.dat
-dir d
-$ cd a
-$ ls
-dir e
-29116 f
-2557 g
-62596 h.lst
-$ cd e
-$ ls
-584 i
-$ cd ..
-$ cd ..
-$ cd d
-$ ls
-4060174 j
-8033020 d.log
-5626152 d.ext
-7214296 k`
-}
+	"aoc22go/get_data"
+)
 
 type File struct {
 	name string
@@ -129,7 +105,7 @@ func (f *FileSystem) changeDirectory(dir_name string, parent *Directory) (d *Dir
 	return d, err
 }
 
-func main() {
+func createFileSystem(data *[]string) (*FileSystem, error) {
 
 	fs := FileSystem{
 		directories: make(map[string]Directory),
@@ -139,10 +115,10 @@ func main() {
 
 	pwd, err := fs.makeDirectory("/", &Directory{})
 	if err != nil {
-		log.Fatal(err)
+		return &fs, err
 	}
 
-	for _, line := range strings.Split(getData(), "\n")[1:] {
+	for _, line := range (*data)[1:] {
 
 		c := string(line[0])
 		switch {
@@ -162,7 +138,7 @@ func main() {
 				} else {
 					pwd, err = fs.changeDirectory(arg, pwd)
 					if err != nil {
-						log.Fatal(err)
+						return &fs, err
 					}
 				}
 
@@ -180,7 +156,7 @@ func main() {
 			file := strings.Split(line, " ")
 			file_size, err := strconv.Atoi(file[0])
 			if err != nil {
-				log.Fatal(err)
+				return &fs, err
 			}
 			pwd.getOrCreateFile(file_size, file[1])
 
@@ -192,24 +168,58 @@ func main() {
 			}
 		}
 	}
+	return &fs, err
+}
 
-	sizes := []int{}
+func getResults(root_size int, directories map[string]Directory) (int, int) {
 
-	for dkey := range fs.directories {
-		dir, exists := fs.directories[dkey]
-		if !exists {
-			log.Fatal(dir, "Does exists")
-		}
+	const system_total_size int = 70000000
+	const space_needed int = 30000000
+
+	var (
+		sum_size_smaller_than_1kk int
+		to_delete_size            int
+	)
+
+	needs_to_delete_at_least := space_needed - (system_total_size - root_size)
+
+	log.Println("Needs to delete at least:", needs_to_delete_at_least)
+
+	for dkey := range directories {
+
+		dir, _ := directories[dkey]
+
 		d_size := dir.getTotalSize()
+
 		if d_size <= 100000 {
-			sizes = append(sizes, d_size)
+			sum_size_smaller_than_1kk += d_size
+		}
+
+		if d_size >= needs_to_delete_at_least &&
+			(to_delete_size == 0 || d_size < to_delete_size) {
+			to_delete_size = d_size
 		}
 	}
+	return sum_size_smaller_than_1kk, to_delete_size
+}
 
-	var total int
-	for _, s := range sizes {
-		total += s
+func main() {
+
+	data, err := getdata.GetInputData("./day7/input")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	log.Println(sizes, total)
+	fs, err := createFileSystem(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	root, _ := fs.directories["/"]
+
+	res1, res2 := getResults(root.getTotalSize(), fs.directories)
+
+	log.Println(res1) // task1: 2031851
+	log.Println(res2) // task2: 2568781
+
 }

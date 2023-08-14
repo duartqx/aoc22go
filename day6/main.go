@@ -1,32 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"log"
-	"os"
 
 	"strings"
+
+	"aoc22go/get_data"
 )
-
-func getInputData(filename string) (data *[]string, err error) {
-
-	data = &[]string{}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return data, err
-	}
-	defer file.Close()
-
-	scan := bufio.NewScanner(file)
-
-	for scan.Scan() {
-		*data = append(*data, scan.Text())
-	}
-
-	return data, nil
-}
 
 func processSignal(signal *string, length int) (int, error) {
 	for start := 0; start <= (len(*signal) - length); start++ {
@@ -48,7 +29,7 @@ func processSignal(signal *string, length int) (int, error) {
 
 func main() {
 
-	data, err := getInputData("./day6/input")
+	data, err := getdata.GetInputData("./day6/input")
 	if err != nil {
 		log.Fatal(err)
 	}

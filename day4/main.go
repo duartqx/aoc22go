@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
+	getdata "aoc22go/get_data"
 	"log"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
@@ -15,25 +14,6 @@ type Result struct {
 	s1  *[]int
 	s2  *[]int
 	err error
-}
-
-func getInputData(filename string) (data *[]string, err error) {
-
-	data = &[]string{}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return data, err
-	}
-	defer file.Close()
-
-	scan := bufio.NewScanner(file)
-
-	for scan.Scan() {
-		*data = append(*data, scan.Text())
-	}
-
-	return data, nil
 }
 
 func getStartEnd(t [2]string) (start, end int, err error) {
@@ -60,8 +40,7 @@ func task(input string) <-chan Result {
 
 	c := make(chan Result)
 
-	gnome_section_data, err := getInputData(input)
-
+	gnome_section_data, err := getdata.GetInputData(input)
 	if err != nil {
 		c <- Result{s1: nil, s2: nil, err: err}
 		return c
