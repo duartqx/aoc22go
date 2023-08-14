@@ -51,9 +51,9 @@ func createFileSystem(data *[]string) (*FileSystem, error) {
 		directories: make(map[string]Directory),
 	}
 
-	var pwd *Directory
+	var cwd *Directory
 
-	pwd, err := fs.makeDirectory("/", &Directory{})
+	cwd, err := fs.makeDirectory("/", &Directory{})
 	if err != nil {
 		return &fs, err
 	}
@@ -71,12 +71,12 @@ func createFileSystem(data *[]string) (*FileSystem, error) {
 
 				arg := strings.Trim(line[5:], " ")
 
-				old_pwd_name := pwd.name
+				old_pwd_name := cwd.name
 
 				if arg == ".." {
-					pwd = pwd.parent
+					cwd = cwd.parent
 				} else {
-					pwd, err = fs.changeDirectory(arg, pwd)
+					cwd, err = fs.changeDirectory(arg, cwd)
 					if err != nil {
 						return &fs, err
 					}
@@ -86,7 +86,7 @@ func createFileSystem(data *[]string) (*FileSystem, error) {
 					"Changed directory from:",
 					old_pwd_name,
 					"to:",
-					pwd.name,
+					cwd.name,
 				)
 
 			case "ls":
@@ -98,11 +98,11 @@ func createFileSystem(data *[]string) (*FileSystem, error) {
 			if err != nil {
 				return &fs, err
 			}
-			pwd.getOrCreateFile(file_size, file[1])
+			cwd.getOrCreateFile(file_size, file[1])
 
 		case c == "d":
 			dir_data := strings.Split(line, " ")
-			pwd.getOrCreateDir(dir_data[1])
+			cwd.getOrCreateDir(dir_data[1])
 		}
 	}
 	return &fs, err
