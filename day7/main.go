@@ -3,7 +3,7 @@ package day7
 import (
 	"log"
 
-	"aoc22go/get_data"
+	"aoc22go/getdata"
 )
 
 func getResults(root_size int, directories map[string]Directory) (int, int) {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	getdata "aoc22go/get_data"
+	"aoc22go/getdata"
 	"log"
 	"slices"
 	"strconv"

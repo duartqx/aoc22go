@@ -6,7 +6,7 @@ import (
 
 	"strings"
 
-	"aoc22go/get_data"
+	"aoc22go/getdata"
 )
 
 func processSignal(signal *string, length int) (int, error) {
