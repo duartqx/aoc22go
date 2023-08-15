@@ -3,8 +3,11 @@ package main
 import (
 	"log"
 	"strconv"
-	"strings"
 )
+
+func getTestData() []string {
+	return []string{"30373", "25512", "65332", "33549", "35390"}
+}
 
 func toInt(b byte) int {
 	i, _ := strconv.Atoi(string(b))
@@ -13,13 +16,7 @@ func toInt(b byte) int {
 
 func main() {
 
-	t := `30373
-25512
-65332
-33549
-35390`
-
-	patch_of_trees := strings.Split(t, "\n")
+	patch_of_trees := getTestData()
 
 	len_patch_of_trees := (len(patch_of_trees) - 2)
 
