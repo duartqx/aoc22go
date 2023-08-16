@@ -5,79 +5,117 @@ import (
 )
 
 type TreeContext struct {
-	row            int
-	column         int
-	current_height int
+	row     int
+	column  int
+	current int
+	grid    *[]string
 }
 
-func getScenicScoreFromTop(ctx *TreeContext, patch_of_trees *[]string) (score int) {
+func (ctx *TreeContext) SetCoords(row, column int) *TreeContext {
+	ctx.row = row
+	ctx.column = column
+	return ctx
+}
+
+func (ctx *TreeContext) SetColumn(column int) *TreeContext {
+	ctx.column = column
+	return ctx
+}
+
+func (ctx *TreeContext) SetRow(row int) *TreeContext {
+	ctx.row = row
+	return ctx
+}
+
+func (ctx *TreeContext) Build() *TreeContext {
+	ctx.current = byteToInt((*ctx.grid)[ctx.row][ctx.column])
+	return ctx
+}
+
+func (ctx *TreeContext) getScenicScoreTop() (score int) {
 	for t := ctx.row - 1; t >= 0; t-- {
 		score++
-		if byteToInt((*patch_of_trees)[t][ctx.column]) >= ctx.current_height {
+		if byteToInt((*ctx.grid)[t][ctx.column]) >= ctx.current {
 			return score
 		}
 	}
 	return score
 }
 
-func getScenicScoreFromBottom(ctx *TreeContext, patch_of_trees *[]string) (score int) {
-	for b := ctx.row + 1; b < len(*patch_of_trees); b++ {
+func (ctx *TreeContext) getScenicScoreBottom() (score int) {
+	for b := ctx.row + 1; b < len(*ctx.grid); b++ {
 		score++
-		if byteToInt((*patch_of_trees)[b][ctx.column]) >= ctx.current_height {
+		if byteToInt((*ctx.grid)[b][ctx.column]) >= ctx.current {
 			return score
 		}
 	}
 	return score
 }
 
-func getScenicScoreFromLeft(ctx *TreeContext, patch_of_trees *[]string) (score int) {
+func (ctx *TreeContext) getScenicScoreLeft() (score int) {
 	for l := ctx.column - 1; l >= 0; l-- {
 		score++
-		if byteToInt((*patch_of_trees)[ctx.row][l]) >= ctx.current_height {
+		if byteToInt((*ctx.grid)[ctx.row][l]) >= ctx.current {
 			return score
 		}
 	}
 	return score
 }
 
-func getScenicScoreFromRight(ctx *TreeContext, patch_of_trees *[]string) (score int) {
-	for r := ctx.column + 1; r < len((*patch_of_trees)[0]); r++ {
+func (ctx *TreeContext) getScenicScoreRight() (score int) {
+	for r := ctx.column + 1; r < len((*ctx.grid)[0]); r++ {
 		score++
-		if byteToInt((*patch_of_trees)[ctx.row][r]) >= ctx.current_height {
+		if byteToInt((*ctx.grid)[ctx.row][r]) >= ctx.current {
 			return score
 		}
 	}
 	return score
+}
+
+type ScenicScore struct {
+	top    int
+	bottom int
+	left   int
+	right  int
+}
+
+func (s *ScenicScore) getScore() int {
+	return s.top * s.bottom * s.left * s.right
 }
 
 func Task2(patch_of_trees *[]string) (score int) {
 
-	var (
-		top_score    int
-		bottom_score int
-		left_score   int
-		right_score  int
-	)
-
 	scenic_scores := []int{}
 
-	for i := 0; i < len(*patch_of_trees); i++ {
-		for j := 0; j < len((*patch_of_trees)[0]); j++ {
+	c := make(chan int)
 
-			ctx := &TreeContext{
-				column: j, row: i, current_height: byteToInt((*patch_of_trees)[i][j]),
+	go func() <-chan int {
+
+		defer close(c)
+
+		ctx := TreeContext{grid: patch_of_trees}
+
+		for i := 0; i < len(*patch_of_trees); i++ {
+			for j := 0; j < len((*patch_of_trees)[0]); j++ {
+
+				ctx.SetCoords(i, j).Build()
+
+				ss := ScenicScore{
+					top:    ctx.getScenicScoreTop(),
+					bottom: ctx.getScenicScoreBottom(),
+					left:   ctx.getScenicScoreLeft(),
+					right:  ctx.getScenicScoreRight(),
+				}
+
+				c <- ss.getScore()
 			}
-
-			top_score = getScenicScoreFromTop(ctx, patch_of_trees)
-			bottom_score = getScenicScoreFromBottom(ctx, patch_of_trees)
-			left_score = getScenicScoreFromLeft(ctx, patch_of_trees)
-			right_score = getScenicScoreFromRight(ctx, patch_of_trees)
-
-			scenic_scores = append(
-				scenic_scores,
-				top_score*bottom_score*left_score*right_score,
-			)
 		}
+
+		return c
+	}()
+
+	for s := range c {
+		scenic_scores = append(scenic_scores, s)
 	}
 
 	return slices.Max(scenic_scores)
