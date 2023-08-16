@@ -6,130 +6,89 @@ import (
 	"strconv"
 )
 
+type VisibilityFunc func(i, j, ch int, patch_of_trees *[]string) bool
+
 func getTestData() *[]string {
 	return &[]string{"30373", "25512", "65332", "33549", "35390"}
 }
 
-func toInt(b byte) int {
+func byteToInt(b byte) int {
 	i, _ := strconv.Atoi(string(b))
 	return i
 }
 
-func getTopVisibility(i, j, current_height int, patch_of_trees *[]string) []bool {
-	is_visible_from_the_top := []bool{}
+func isVisibleFromTop(i, j, current_height int, patch_of_trees *[]string) bool {
 	for t := i - 1; t >= 0; t-- {
-		is_visible_from_the_top = append(
-			is_visible_from_the_top,
-			current_height > toInt((*patch_of_trees)[t][j]),
-		)
-	}
-	return is_visible_from_the_top
-}
-
-func getBottomVisibility(i, j, current_height int, patch_of_trees *[]string) []bool {
-	is_visible_from_the_bottom := []bool{}
-	for b := i + 1; b < len(*patch_of_trees); b++ {
-		is_visible_from_the_bottom = append(
-			is_visible_from_the_bottom,
-			current_height > toInt((*patch_of_trees)[b][j]),
-		)
-	}
-	return is_visible_from_the_bottom
-}
-
-func getLeftVisibility(i, j, current_height int, patch_of_trees *[]string) []bool {
-	is_visible_from_the_left := []bool{}
-	for l := j - 1; l >= 0; l-- {
-		is_visible_from_the_left = append(
-			is_visible_from_the_left,
-			current_height > toInt((*patch_of_trees)[i][l]),
-		)
-	}
-	return is_visible_from_the_left
-}
-
-func getRightVisibility(i, j, current_height int, patch_of_trees *[]string) []bool {
-	is_visible_from_the_right := []bool{}
-	for r := j + 1; r < len((*patch_of_trees)[0]); r++ {
-		is_visible_from_the_right = append(
-			is_visible_from_the_right,
-			current_height > toInt((*patch_of_trees)[i][r]),
-		)
-	}
-	return is_visible_from_the_right
-}
-
-func visibleCount(is_visible_from_a_side *[]bool) int {
-
-	visibility_counter := 0
-	for _, v := range *is_visible_from_a_side {
-		if v {
-			visibility_counter++
+		if current_height <= byteToInt((*patch_of_trees)[t][j]) {
+			return false
 		}
 	}
-	return visibility_counter
+	return true
+}
+
+func isVisibleFromBottom(i, j, current_height int, patch_of_trees *[]string) bool {
+	for b := i + 1; b < len(*patch_of_trees); b++ {
+		if current_height <= byteToInt((*patch_of_trees)[b][j]) {
+			return false
+		}
+	}
+	return true
+}
+
+func isVisibleFromLeft(i, j, current_height int, patch_of_trees *[]string) bool {
+	for l := j - 1; l >= 0; l-- {
+		if current_height <= byteToInt((*patch_of_trees)[i][l]) {
+			return false
+		}
+	}
+	return true
+}
+
+func isVisibleFromRight(i, j, current_height int, patch_of_trees *[]string) bool {
+	for r := j + 1; r < len((*patch_of_trees)[0]); r++ {
+		if current_height <= byteToInt((*patch_of_trees)[i][r]) {
+			return false
+		}
+	}
+	return true
 }
 
 func main() {
-
-	patch_of_trees, err := getdata.GetInputData("./input")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// patch_of_trees := getTestData()
 
 	var (
 		len_patch_of_trees      int
 		len_row_of_trees        int
 		current_tree_height     int
 		number_of_visible_trees int
-		visibility              []bool
+		patch_of_trees          *[]string
 	)
+
+	patch_of_trees, err := getdata.GetInputData("./input")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	len_patch_of_trees = (len(*patch_of_trees) - 2)
 	len_row_of_trees = len((*patch_of_trees)[0])
 	number_of_visible_trees = (len_row_of_trees * 2) + (len_patch_of_trees * 2)
 
+	visibility_functions := []VisibilityFunc{
+		isVisibleFromTop,
+		isVisibleFromBottom,
+		isVisibleFromLeft,
+		isVisibleFromRight,
+	}
+
 	for i := 1; i < len(*patch_of_trees)-1; i++ {
 		for j := 1; j < len((*patch_of_trees)[0])-1; j++ {
 
-			current_tree_height = toInt((*patch_of_trees)[i][j])
+			current_tree_height = byteToInt((*patch_of_trees)[i][j])
 
-			// Top Visibility
-			visibility = getTopVisibility(
-				i, j, current_tree_height, patch_of_trees,
-			)
-			if len(visibility) != 0 && visibleCount(&visibility) == len(visibility) {
-				number_of_visible_trees++
-				continue
-			}
-
-			// Bottom Visibility
-			visibility = getBottomVisibility(
-				i, j, current_tree_height, patch_of_trees,
-			)
-			if len(visibility) != 0 && visibleCount(&visibility) == len(visibility) {
-				number_of_visible_trees++
-				continue
-			}
-
-			// Left Visibility
-			visibility = getLeftVisibility(
-				i, j, current_tree_height, patch_of_trees,
-			)
-			if len(visibility) != 0 && visibleCount(&visibility) == len(visibility) {
-				number_of_visible_trees++
-				continue
-			}
-
-			// Right Visibility
-			visibility = getRightVisibility(
-				i, j, current_tree_height, patch_of_trees,
-			)
-			if len(visibility) != 0 && visibleCount(&visibility) == len(visibility) {
-				number_of_visible_trees++
-				continue
+			for _, isVisibleFunc := range visibility_functions {
+				if isVisibleFunc(i, j, current_tree_height, patch_of_trees) {
+					number_of_visible_trees++
+					break
+				}
 			}
 		}
 	}
