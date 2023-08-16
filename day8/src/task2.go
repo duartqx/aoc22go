@@ -8,12 +8,20 @@ type ScenicScore struct {
 }
 
 func (s *ScenicScore) SetCoords(row, column int) *ScenicScore {
+	return s.SetRow(row).SetColumn(column).SetCurrent()
+}
+
+func (s *ScenicScore) SetRow(row int) *ScenicScore {
 	s.row = row
+	return s
+}
+
+func (s *ScenicScore) SetColumn(column int) *ScenicScore {
 	s.column = column
 	return s
 }
 
-func (s *ScenicScore) Build() *ScenicScore {
+func (s *ScenicScore) SetCurrent() *ScenicScore {
 	s.current = byteToInt((*s.grid)[s.row][s.column])
 	return s
 }
@@ -75,9 +83,8 @@ func Task2(patch_of_trees *[]string) (score int) {
 		for i := 0; i < len(*patch_of_trees); i++ {
 			for j := 0; j < len((*patch_of_trees)[0]); j++ {
 
-				s.SetCoords(i, j).Build()
+				c <- s.SetCoords(i, j).GetScore()
 
-				c <- s.GetScore()
 			}
 		}
 
