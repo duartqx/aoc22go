@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"log"
-
 	"strings"
+	"sync"
 
 	"aoc22go/getdata"
 )
 
-func processSignal(signal *string, length int) (int, error) {
+func processSignal(signal *string, length int, wg *sync.WaitGroup) (int, error) {
 	for start := 0; start <= (len(*signal) - length); start++ {
 
 		end := (start + length)
@@ -21,6 +21,8 @@ func processSignal(signal *string, length int) (int, error) {
 		}
 
 		if len(stream) == length {
+			log.Println(end)
+			wg.Done()
 			return end, nil
 		}
 	}
@@ -29,22 +31,17 @@ func processSignal(signal *string, length int) (int, error) {
 
 func main() {
 
-	data, err := getdata.GetInputData("./day6/input")
+	ch, err := getdata.GetInputChannel("./day6/input")
 	if err != nil {
 		log.Fatal(err)
 	}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 
-	signal := (*data)[0]
-
-	signal_marker, err := processSignal(&signal, 4) // 1578
-	if err != nil {
-		log.Fatal(err)
+	for signal := range ch {
+		go processSignal(&signal, 4, &wg)  // 1578
+		go processSignal(&signal, 14, &wg) // 2178
 	}
 
-	signal_message, err := processSignal(&signal, 14) // 2178
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println(signal_marker, signal_message)
+	wg.Wait()
 }

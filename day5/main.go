@@ -67,7 +67,7 @@ func crateMover9001(instrunctions *[][]int, crates_stacks *map[int][]byte) {
 
 func task(input string, crate_type string) {
 
-	data, err := getdata.GetInputData(input)
+	data, err := getdata.GetInputChannel(input)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,7 +76,7 @@ func task(input string, crate_type string) {
 
 	instrunctions := [][]int{}
 
-	for _, row := range *data {
+	for row := range data {
 		if strings.Trim(row, " ") == "" || string(row[1]) == "1" {
 			continue
 		} else if strings.Contains(row, "move") {
@@ -111,7 +111,7 @@ func task(input string, crate_type string) {
 }
 
 func main() {
-	input := "./input"
+	input := "./day5/input"
 	task(input, "CrateMover 9000") // TBVFVDZPN
 	task(input, "CrateMover 9001") // VLCWHTDSZ
 }
