@@ -2,8 +2,9 @@ package main
 
 import (
 	"aoc22go/day10/src"
+	"aoc22go/getdata"
 	"log"
-	"strconv"
+	"strings"
 )
 
 // DURING cycle -> check strength
@@ -15,48 +16,21 @@ import (
 
 // noop takes one cycle to complete. It has no other effect
 
-type CathodeTube struct {
-	x         int
-	cycles    int
-	strengths map[int]int
-}
-
-func (c *CathodeTube) checkStrength() {
-	if c.cycles%40 == 20 {
-		c.strengths[c.cycles] = c.cycles * c.x
-	}
-}
-
-func (c *CathodeTube) getStrengthSum() (s int) {
-	for key := range c.strengths {
-		s += c.strengths[key]
-	}
-	return s
-}
-
 func main() {
 
-	data := src.GetTestData()
-
-	c := CathodeTube{x: 1, strengths: make(map[int]int)}
-
-	for line := range data {
-
-		c.cycles += 1
-
-		switch line[0] {
-		case "noop":
-			c.checkStrength()
-		case "addx":
-			c.checkStrength()
-
-			c.cycles += 1
-
-			c.checkStrength()
-
-			y, _ := strconv.Atoi(line[1])
-			c.x += y
-		}
+	data, err := getdata.GetInputChannel("./day10/input")
+	if err != nil {
+		log.Fatal(err)
 	}
-	log.Println(c.strengths, c.getStrengthSum())
+
+	c := new(src.CathodeTube)
+
+	c.Build()
+
+	for d := range data {
+		instrunction := strings.Split(d, " ")
+		c.Cycle(instrunction)
+	}
+
+	log.Println(c.GetStrengths()) // 17180
 }
