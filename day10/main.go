@@ -15,50 +15,48 @@ import (
 
 // noop takes one cycle to complete. It has no other effect
 
-func checkStrength(cycles, x int) (str int) {
-	if cycles%40 == 20 {
-		str = cycles * x
+type CathodeTube struct {
+	x         int
+	cycles    int
+	strengths map[int]int
+}
+
+func (c *CathodeTube) checkStrength() {
+	if c.cycles%40 == 20 {
+		c.strengths[c.cycles] = c.cycles * c.x
 	}
-	return str
+}
+
+func (c *CathodeTube) getStrengthSum() (s int) {
+	for key := range c.strengths {
+		s += c.strengths[key]
+	}
+	return s
 }
 
 func main() {
-	c := src.GetTestData()
 
-	x := 1
-	cycles := 0
+	data := src.GetTestData()
 
-	strengths := make(map[int]int)
+	c := CathodeTube{x: 1, strengths: make(map[int]int)}
 
-	for line := range c {
+	for line := range data {
 
-		cycles += 1
+		c.cycles += 1
 
 		switch line[0] {
 		case "noop":
-			strength := checkStrength(cycles, x)
-			if strength != 0 {
-				log.Println(line[0], cycles, x)
-				strengths[cycles] = strength
-			}
+			c.checkStrength()
 		case "addx":
-			strength := checkStrength(cycles, x)
-			if strength != 0 {
-				log.Println(line[0], cycles, x)
-				strengths[cycles] = strength
-			}
+			c.checkStrength()
 
-			cycles += 1
+			c.cycles += 1
 
-			strength = checkStrength(cycles, x)
-			if strength != 0 {
-				log.Println(line[0], cycles, x)
-				strengths[cycles] = strength
-			}
+			c.checkStrength()
 
 			y, _ := strconv.Atoi(line[1])
-			x += y
+			c.x += y
 		}
 	}
-	log.Println(strengths)
+	log.Println(c.strengths, c.getStrengthSum())
 }
