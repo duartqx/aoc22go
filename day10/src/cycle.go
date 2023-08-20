@@ -8,8 +8,8 @@ type CathodeTube struct {
 	x         int
 	cycles    int
 	strengths map[int]int
+	screen    [][]string
 	prow      int
-	pixels    [][]string
 }
 
 func (c *CathodeTube) checkStrength() {
@@ -19,18 +19,20 @@ func (c *CathodeTube) checkStrength() {
 }
 
 func (c *CathodeTube) draw() {
-	if len(c.pixels[c.prow]) == 40 {
+	if len(c.screen[c.prow]) == 40 {
 		c.prow += 1
 	}
 
-	cycle := c.cycles % 40
+	var (
+		cycle int       = c.cycles % 40
+		pixel *[]string = &(c.screen[c.prow])
+	)
 
 	if cycle == (c.x-1) || cycle == c.x || cycle == (c.x+1) {
-		c.pixels[c.prow] = append(c.pixels[c.prow], "#")
+		*pixel = append(*pixel, "#")
 	} else {
-		c.pixels[c.prow] = append(c.pixels[c.prow], ".")
+		*pixel = append(*pixel, ".")
 	}
-
 }
 
 func (c *CathodeTube) drawAndCheck() {
@@ -42,9 +44,9 @@ func (c *CathodeTube) drawAndCheck() {
 func (c *CathodeTube) Build() *CathodeTube {
 	c.x = 1
 	c.strengths = make(map[int]int)
-	c.pixels = make([][]string, 6)
-	for i := range c.pixels {
-		c.pixels[i] = []string{}
+	c.screen = make([][]string, 6)
+	for i := range c.screen {
+		c.screen[i] = []string{}
 	}
 	return c
 }
@@ -62,13 +64,13 @@ func (c *CathodeTube) Cycle(instruction []string) {
 	}
 }
 
-func (c *CathodeTube) GetStrengths() (strengths map[int]int, s int) {
+func (c *CathodeTube) GetStrengths() (s int) {
 	for key := range c.strengths {
 		s += c.strengths[key]
 	}
-	return c.strengths, s
+	return s
 }
 
 func (c *CathodeTube) GetScreen() [][]string {
-	return c.pixels
+	return c.screen
 }
