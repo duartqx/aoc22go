@@ -18,6 +18,7 @@ import (
 
 func main() {
 
+	// data := src.GetTestData()
 	data, err := getdata.GetInputChannel("./day10/input")
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +31,11 @@ func main() {
 	for d := range data {
 		instrunction := strings.Split(d, " ")
 		c.Cycle(instrunction)
+		// c.Cycle(d)
 	}
 
 	log.Println(c.GetStrengths()) // 17180
+	for _, row := range c.GetScreen() {
+		log.Println(strings.Join(row, ""))
+	} // rehprlub
 }
