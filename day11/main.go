@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 type MonkeyTest struct {
-	testDivisible int
-	monkeyIdTrue  int
-	monkeyIdFalse int
+	Div   int
+	True  int
+	False int
 }
 
 type Monkey struct {
@@ -20,6 +21,11 @@ type Monkey struct {
 	op    [3]string
 	mtest MonkeyTest
 	evals int
+}
+
+func (m *Monkey) receiveItem(item int) *Monkey {
+	m.items = append(m.items, item)
+	return m
 }
 
 func (m *Monkey) SetItems(items []int) *Monkey {
@@ -33,26 +39,21 @@ func (m *Monkey) SetOp(op []string) *Monkey {
 }
 
 func (m *Monkey) SetMtestDiv(div int) *Monkey {
-	m.mtest.testDivisible = div
+	m.mtest.Div = div
 	return m
 }
 
 func (m *Monkey) SetMtestTrue(t int) *Monkey {
-	m.mtest.monkeyIdTrue = t
+	m.mtest.True = t
 	return m
 }
 
 func (m *Monkey) SetMtestFalse(f int) *Monkey {
-	m.mtest.monkeyIdFalse = f
+	m.mtest.False = f
 	return m
 }
 
-func (m *Monkey) receiveItem(item int) *Monkey {
-	m.items = append(m.items, item)
-	return m
-}
-
-func (m *Monkey) operation(old int) (item int, tomonkey int) {
+func (m *Monkey) Operation(old int) (item int, tomonkey int) {
 	i, err := strconv.Atoi(m.op[0])
 	if err != nil {
 		i = old
@@ -76,22 +77,24 @@ func (m *Monkey) operation(old int) (item int, tomonkey int) {
 
 	item = item / 3
 
-	if item%m.mtest.testDivisible == 0 {
-		return item, m.mtest.monkeyIdTrue
+	if item%m.mtest.Div == 0 {
+		return item, m.mtest.True
 	}
-	return item, m.mtest.monkeyIdFalse
+	return item, m.mtest.False
 }
 
-func (m *Monkey) Operate(monkeys *[]*Monkey) {
+func (m *Monkey) Operate(mnks *Monkeys) {
 	for _, item := range m.items {
-		ev, monkeyId := m.operation(item)
-		(*monkeys)[monkeyId].receiveItem(ev)
+		ev, monkeyId := m.Operation(item)
+		(*mnks)[monkeyId].receiveItem(ev)
 		m.evals += 1
 	}
 	m.items = []int{}
 }
 
-func getMonkeys(input string) (*[]*Monkey, error) {
+type Monkeys []*Monkey
+
+func (mnks *Monkeys) ParseMonkeys(input string) (*Monkeys, error) {
 	file, err := os.Open(input)
 	if err != nil {
 		return nil, err
@@ -101,10 +104,7 @@ func getMonkeys(input string) (*[]*Monkey, error) {
 
 	defer file.Close()
 
-	var (
-		monkey  *Monkey
-		monkeys = &[]*Monkey{}
-	)
+	var monkey *Monkey
 
 	for scan.Scan() {
 
@@ -159,29 +159,36 @@ func getMonkeys(input string) (*[]*Monkey, error) {
 			}
 			monkey.SetMtestFalse(f)
 
-			*monkeys = append(*monkeys, monkey)
+			*mnks = append(*mnks, monkey)
 		}
 	}
 
-	return monkeys, nil
+	return mnks, nil
+}
+
+func (mnks *Monkeys) GetMonkeyBusiness() int {
+
+	inspects := []int{}
+	for _, monkey := range *mnks {
+		inspects = append(inspects, monkey.evals)
+	}
+	slices.Sort(inspects)
+	inspects = inspects[len(inspects)-2:]
+
+	monkey_business := inspects[0] * inspects[1]
+	return monkey_business
 }
 
 func main() {
-	monkeys, err := getMonkeys("./day11/input_test")
+	var mnks = new(Monkeys)
+	mnks, err := mnks.ParseMonkeys("./day11/input")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for i := 0; i < 20; i++ {
-		for _, monkey := range *monkeys {
-			monkey.Operate(monkeys)
+		for _, monkey := range *mnks {
+			monkey.Operate(mnks)
 		}
-
-		log.Println("Round", i+1)
-
-		for _, monkey := range *monkeys {
-			log.Printf("Monkey %d: %d, %v", monkey.id, monkey.evals, monkey.items)
-		}
-
-		log.Println()
 	}
+	log.Println(mnks.GetMonkeyBusiness()) // 151312
 }
