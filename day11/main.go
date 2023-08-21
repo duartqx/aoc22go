@@ -9,9 +9,9 @@ import (
 )
 
 type MonkeyTest struct {
-	divible int
-	t       int
-	f       int
+	testDivisible int
+	monkeyIdTrue  int
+	monkeyIdFalse int
 }
 
 type Monkey struct {
@@ -19,6 +19,7 @@ type Monkey struct {
 	items []int
 	op    [3]string
 	mtest MonkeyTest
+	evals int
 }
 
 func (m *Monkey) SetItems(items []int) *Monkey {
@@ -32,25 +33,65 @@ func (m *Monkey) SetOp(op []string) *Monkey {
 }
 
 func (m *Monkey) SetMtestDiv(div int) *Monkey {
-	m.mtest.divible = div
+	m.mtest.testDivisible = div
 	return m
 }
 
 func (m *Monkey) SetMtestTrue(t int) *Monkey {
-	m.mtest.t = t
+	m.mtest.monkeyIdTrue = t
 	return m
 }
 
 func (m *Monkey) SetMtestFalse(f int) *Monkey {
-	m.mtest.f = f
+	m.mtest.monkeyIdFalse = f
 	return m
 }
 
-func (m *Monkey) Operation() {
-
+func (m *Monkey) receiveItem(item int) *Monkey {
+	m.items = append(m.items, item)
+	return m
 }
 
-func getInputData(input string) (*[]Monkey, error) {
+func (m *Monkey) operation(old int) (item int, tomonkey int) {
+	i, err := strconv.Atoi(m.op[0])
+	if err != nil {
+		i = old
+	}
+
+	j, err := strconv.Atoi(m.op[2])
+	if err != nil {
+		j = old
+	}
+
+	switch {
+	case m.op[1] == "+":
+		item = i + j
+	case m.op[1] == "-":
+		item = i - j
+	case m.op[1] == "*":
+		item = i * j
+	case m.op[1] == "/":
+		item = i / j
+	}
+
+	item = item / 3
+
+	if item%m.mtest.testDivisible == 0 {
+		return item, m.mtest.monkeyIdTrue
+	}
+	return item, m.mtest.monkeyIdFalse
+}
+
+func (m *Monkey) Operate(monkeys *[]*Monkey) {
+	for _, item := range m.items {
+		ev, monkeyId := m.operation(item)
+		(*monkeys)[monkeyId].receiveItem(ev)
+		m.evals += 1
+	}
+	m.items = []int{}
+}
+
+func getMonkeys(input string) (*[]*Monkey, error) {
 	file, err := os.Open(input)
 	if err != nil {
 		return nil, err
@@ -61,8 +102,8 @@ func getInputData(input string) (*[]Monkey, error) {
 	defer file.Close()
 
 	var (
-		monkey  Monkey
-		monkeys []Monkey
+		monkey  *Monkey
+		monkeys = &[]*Monkey{}
 	)
 
 	for scan.Scan() {
@@ -78,7 +119,7 @@ func getInputData(input string) (*[]Monkey, error) {
 				return nil, err
 			}
 
-			monkey = Monkey{id: id, mtest: MonkeyTest{}}
+			monkey = &Monkey{id: id, mtest: MonkeyTest{}}
 
 		case strings.Contains(m, "  Starting items:"):
 			items_str := strings.Split(m[18:], ", ")
@@ -118,19 +159,29 @@ func getInputData(input string) (*[]Monkey, error) {
 			}
 			monkey.SetMtestFalse(f)
 
-		default:
-			monkeys = append(monkeys, monkey)
+			*monkeys = append(*monkeys, monkey)
 		}
 	}
 
-	// }()
-	return &monkeys, nil
+	return monkeys, nil
 }
 
 func main() {
-	monkeys, err := getInputData("./day11/input_test")
+	monkeys, err := getMonkeys("./day11/input_test")
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(monkeys)
+	for i := 0; i < 20; i++ {
+		for _, monkey := range *monkeys {
+			monkey.Operate(monkeys)
+		}
+
+		log.Println("Round", i+1)
+
+		for _, monkey := range *monkeys {
+			log.Printf("Monkey %d: %d, %v", monkey.id, monkey.evals, monkey.items)
+		}
+
+		log.Println()
+	}
 }
