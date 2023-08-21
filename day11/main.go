@@ -53,7 +53,7 @@ func (m *Monkey) SetMtestFalse(f int) *Monkey {
 	return m
 }
 
-func (m *Monkey) Operation(old int) (item int, tomonkey int) {
+func (m *Monkey) Operation(old int, worried bool) (item int, tomonkey int) {
 	i, err := strconv.Atoi(m.op[0])
 	if err != nil {
 		i = old
@@ -75,7 +75,9 @@ func (m *Monkey) Operation(old int) (item int, tomonkey int) {
 		item = i / j
 	}
 
-	item = item / 3
+	if !worried {
+		item = item / 3
+	}
 
 	if item%m.mtest.Div == 0 {
 		return item, m.mtest.True
@@ -83,13 +85,14 @@ func (m *Monkey) Operation(old int) (item int, tomonkey int) {
 	return item, m.mtest.False
 }
 
-func (m *Monkey) Operate(mnks *Monkeys) {
+func (m *Monkey) Operate(mnks *Monkeys, worried bool) *Monkeys {
 	for _, item := range m.items {
-		ev, monkeyId := m.Operation(item)
-		(*mnks)[monkeyId].receiveItem(ev)
+		ev, monkeyId := m.Operation(item, worried)
+		(*mnks)[monkeyId] = (*mnks)[monkeyId].receiveItem(ev)
 		m.evals += 1
 	}
 	m.items = []int{}
+	return mnks
 }
 
 type Monkeys []*Monkey
@@ -174,20 +177,25 @@ func (mnks *Monkeys) GetMonkeyBusiness() int {
 	}
 	slices.Sort(inspects)
 	inspects = inspects[len(inspects)-2:]
-
 	monkey_business := inspects[0] * inspects[1]
 	return monkey_business
 }
 
+type Rounds struct {
+	howMany int
+	worried bool
+}
+
 func main() {
+
 	var mnks = new(Monkeys)
 	mnks, err := mnks.ParseMonkeys("./day11/input")
 	if err != nil {
 		log.Fatal(err)
 	}
-	for i := 0; i < 20; i++ {
+	for i := 1; i <= 20; i++ {
 		for _, monkey := range *mnks {
-			monkey.Operate(mnks)
+			mnks = monkey.Operate(mnks, false)
 		}
 	}
 	log.Println(mnks.GetMonkeyBusiness()) // 151312
